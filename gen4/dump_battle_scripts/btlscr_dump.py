@@ -41,7 +41,7 @@ def count_message_params(tag: MessageTag) -> int:
 def parse_message_params(tag: MessageTag, chunks: Iterable[int]) -> list[str]:
     return list(map(lambda _: Battler(next(chunks)).name, range(count_message_params(tag))))
 
-def format(param: any, chunks: Iterable, labels: dict, i: int, gmm_bank: str) -> list[str]:
+def format(param: any, chunks: Iterable, labels: dict, i: int, label_offset: int, gmm_bank: str) -> list[str]:
     params = []
 
     match param:
@@ -58,8 +58,8 @@ def format(param: any, chunks: Iterable, labels: dict, i: int, gmm_bank: str) ->
         case Enum():
             params.append(param.name)
         case Label():
-            label = f'_{(i + param.addr):03}'
-            labels[i + param.addr + 1] = label
+            label = f'_{(i + param.addr + label_offset):03}'
+            labels[i + param.addr + label_offset + 1] = label
             params.append(label)
         case VariableValue():
             params.append(param.name())
@@ -89,15 +89,18 @@ def parse_commands(chunks: Iterable, cmd: list[Command], gmm_bank: str) -> tuple
         command = cmd[chunk]
         parsed.append(command.name)
         params = []
+        j = sum(map(lambda type: 2 if type in (VariableValue, MonParamValue) else 1, command.params))
 
         for param_type in command.params:
             if param_type in (VariableValue, MonParamValue):
                 param = param_type(next(chunks), next(chunks))
+                j = j - 2
             else:
                 param = param_type(next(chunks))
+                j = j - 1
             
             i = i + 1 + count_varargs(param)
-            params.extend(format(param, chunks, labels, i, gmm_bank))            
+            params.extend(format(param, chunks, labels, i, j, gmm_bank))            
         
         parsed.append(params)
         i = i + 1
@@ -146,9 +149,9 @@ def dumps(scr: bytes, cmd: list[Command], txt_root: XML.Element, gmm_bank: str) 
         
         match command:
             case 'PrintMessage' | 'PrintGlobalMessage' | 'BufferMessage':
-                lines.append(f'    @ {format_txt_string(params[0], txt_root)}')
+                lines.append(f'    // {format_txt_string(params[0], txt_root)}')
             case 'BufferLocalMessage':
-                lines.append(f'    @ {format_txt_string(params[1], txt_root)}')
+                lines.append(f'    // {format_txt_string(params[1], txt_root)}')
 
         lines.append(f'    {command} {", ".join(params)}')
         i = i + len(params) + sum(map(count_varargs, params)) + 1
