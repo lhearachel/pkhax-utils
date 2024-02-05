@@ -51,8 +51,8 @@ def format(param: any, chunks: Iterable, labels: dict, i: int, label_offset: int
         case MessageId():
             gmm_bank_parts = gmm_bank.split('_')
             gmm_bank_prefix = '_'.join([
-                *gmm_bank_parts[:2],
-                f'{int(gmm_bank_parts[2]):08}'
+                *gmm_bank_parts[:-1],
+                f'{int(gmm_bank_parts[-1]):08}'
             ])
             params.append(f'{gmm_bank_prefix}_{param.id:05}')
         case Enum():
