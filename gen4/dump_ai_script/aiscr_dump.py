@@ -28,7 +28,7 @@ def format_loaded(param: any, loaded_type) -> list[str]:
     if issubclass(loaded_type, Enum):
         params.append(loaded_type(param.val).name)
     elif loaded_type == bool:
-        params.append('TRUE' if param else 'FALSE')
+        params.append('TRUE' if param.val else 'FALSE')
     else:
         params.append(str(param.val))
 
@@ -99,7 +99,7 @@ def parse_commands(chunks: Iterable) -> tuple[list, dict, dict]:
         if i in TABLE_LOCATIONS:
             tables[i] = read_table(chunk, chunks, TABLE_LOCATIONS[i])
             labels[i] = f'_{i:05}'
-            print(f'@ {hex(i * 4)}: TABLE -> {tables[i]}')
+            #print(f'@ {hex(i * 4)}: TABLE -> {tables[i]}')
             i = i + len(tables[i])
             continue
 
@@ -116,7 +116,7 @@ def parse_commands(chunks: Iterable) -> tuple[list, dict, dict]:
         if command.name in TYPE_LOADERS:
             loaded_type = TYPE_LOADERS[command.name]
         
-        print(f'@ {hex(i * 4)}: ', end='')
+        #print(f'@ {hex(i * 4)}: ', end='')
         for param_type in command.params:
             param = param_type(next(chunks))
             j = j - 1
@@ -127,7 +127,7 @@ def parse_commands(chunks: Iterable) -> tuple[list, dict, dict]:
             else:
                 params.extend(format_params(param, labels, i, j))
         
-        print(f'{command.name} -> {params}')
+        #print(f'{command.name} -> {params}')
         parsed.append(params)
         i = i + 1
     
@@ -157,7 +157,7 @@ def dumps(scr: bytes) -> str:
         '',
         '    .data',
         '',
-        '_0000:',
+        '_00000:',
     ]
     
     # The first 32 words of the binary is a list of labels; each is associated with
@@ -166,7 +166,7 @@ def dumps(scr: bytes) -> str:
     flag_labels = collect_flag_labels(iter(flag_table))
     print(flag_labels)
     for j in flag_table:
-        lines.append(f'    TableEntry {flag_labels[types.sint(j, 32)]}')
+        lines.append(f'    LabelDistance {flag_labels[types.sint(j, 32)]}, _00000')
 
     # Everything hereafter is part of the AI script.
     # First pass: parse to types, convert labels to strings, record future labels
