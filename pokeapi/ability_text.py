@@ -10,6 +10,7 @@ args = ARGPARSER.parse_args()
 
 by_ability = {}
 for ability in args.abilities:
+    print(f'processing {ability}...')
     resp = requests.get(POKEAPI + ability).json()
     candidates = {}
     for fte in resp['flavor_text_entries']:
@@ -44,7 +45,7 @@ for ability in args.abilities:
 print('')
 
 choices = []
-for i, (ability, desc_set) in enumerate(by_ability.items()):
+for i, (ability, desc_set) in enumerate(by_ability.items(), start=int(args.start)):
     if len(desc_set) == 0:
         print(f'No good description found for {ability}; good luck!')
 
@@ -61,7 +62,7 @@ for i, (ability, desc_set) in enumerate(by_ability.items()):
         chosen_desc = list(desc_set.values())[choice - 1]
 
     choices.append((
-        f'\t<row id="pl_msg_00000612_{(args.start + i):05}" index="{args.start + i}">\n'
+        f'\t<row id="pl_msg_00000612_{i:05}" index="{i}">\n'
         '\t\t<attribute name="window_context_name">used</attribute>\n'
         f'\t\t<language name="English">{chosen_desc}</language>\n'
         '\t</row>'
