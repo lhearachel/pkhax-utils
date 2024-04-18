@@ -15,11 +15,15 @@ class NARCDirs:
 class SupportedNARCs(StrEnum):
     BE_SEQ = auto()
     SUB_SEQ = auto()
+    PL_OTHERPOKE = auto()
+    PL_POKEGRA = auto()
 
 
 SUPPORTED_NARCS = {
     SupportedNARCs.BE_SEQ: NARCDirs('res/prebuilt/battle/skill', 'build/res/battle/scripts', 4),
     SupportedNARCs.SUB_SEQ: NARCDirs('res/prebuilt/battle/skill', 'build/res/battle/scripts', 4),
+    SupportedNARCs.PL_OTHERPOKE: NARCDirs('tmp/', 'build/res/pokemon'),
+    SupportedNARCs.PL_POKEGRA: NARCDirs('tmp/', 'build/res/pokemon'),
 }
 
 
@@ -69,7 +73,7 @@ for narc in narcs:
         if num_cpue_chunks != num_made_chunks:
             diff = True
             print(f'Diff in chunk count in file {i:04}.bin; CPUE: {num_cpue_chunks}, PKPT: {num_made_chunks}', file=stderr)
-        
+
         for chunk_i in range(num_cpue_chunks):
             cpue_chunk = cpue_bytes[chunk_i * narc.chunk_size : (chunk_i + 1) * narc.chunk_size]
             made_chunk = made_bytes[chunk_i * narc.chunk_size : (chunk_i + 1) * narc.chunk_size]
